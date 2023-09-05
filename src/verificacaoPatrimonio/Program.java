@@ -23,6 +23,8 @@ public class Program implements AcaoRotinaJava {
 	@Override
 	public void doAction(ContextoAcao ctx) throws Exception {
 		
+		System.out.println("Codigo inicado");
+		
 		JdbcWrapper JDBC = JapeFactory.getEntityFacade().getJdbcWrapper();
 		NativeSql nativeSql = new NativeSql(JDBC);
 		JapeSession.SessionHandle hnd = JapeSession.open();
@@ -33,12 +35,16 @@ public class Program implements AcaoRotinaJava {
 		
 		BigDecimal usuarioLogado = ((AuthenticationInfo) ServiceContext.getCurrent().getAutentication()).getUserID();
 		
+		String obs = (String) ctx.getParam("OBS");
+		int pla =  (int) ctx.getParam("PLAPATRIMONIO");
+		
+		System.out.println("Teste parametro :" + obs);
 		
 		for (int i = 0; i < (ctx.getLinhas()).length ; i++ ) {
 			Registro linha = ctx.getLinhas()[i];
 			nuNota = (BigDecimal) linha.getCampo("NUNOTA");
 		}
-		
+	
 		ResultSet codG = nativeSql.executeQuery("SELECT NOMEUSU, CODGRUPO FROM TSIUSU WHERE CODUSU = " + usuarioLogado);
 		
 		while (codG.next()) {
@@ -46,12 +52,7 @@ public class Program implements AcaoRotinaJava {
 			codGrupo = codG.getInt("CODGRUPO");
 		}
 		
-		//if (codGrupo != 4 || codGrupo != 6) {
-		//	ctx.setMensagemRetorno("Voce nao tem permissão para usar essa rotina, somente grupos de usuario 4 e 6 ");
-		//	return;
-		//}
-		
-		email.enviaEmail(codGrupo, usuarioLogado, nuNota);
+		email.enviaEmail(codGrupo, usuarioLogado, nuNota, obs, pla);
 		
 		if (codGrupo == 4 ) {
 			alcamp.alteraCampoContabilidade(nuNota);

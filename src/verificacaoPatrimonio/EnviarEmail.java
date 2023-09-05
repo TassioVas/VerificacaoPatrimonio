@@ -22,7 +22,7 @@ public class EnviarEmail {
 
 	BigDecimal codFila = null;
 
-	public void enviaEmail(int codGrupo, BigDecimal usuarioLogado, BigDecimal nuNota) {
+	public void enviaEmail(int codGrupo, BigDecimal usuarioLogado, BigDecimal nuNota, String obs, int pla) {
 
 		JdbcWrapper jdbc = JapeFactory.getEntityFacade().getJdbcWrapper();
 		NativeSql nativeSql = new NativeSql(jdbc);
@@ -30,6 +30,13 @@ public class EnviarEmail {
 		EntityFacade dwfEntityFacade = EntityFacadeFactory.getDWFFacade();
 		jdbc = dwfEntityFacade.getJdbcWrapper();
 		JapeSession.SessionHandle hnd = JapeSession.open();
+		
+		BigDecimal teste = new BigDecimal(pla);
+		
+		if (teste == null) {
+			System.out.println("pASSOU AQUI NO IF SE VC NAO PREENCHEU TA CERTO");
+			teste = new BigDecimal(0);
+		}
 
 		if (codGrupo == 6) {
 			corpoEmail = " <h2>CONTABILIDADE</h2>\r\n"
@@ -42,14 +49,19 @@ public class EnviarEmail {
 					+ "		 <p><span style=\"font-size:14px\"><b>NÃO RESPONDA ESTE E-MAIL!<br></b></span><span style=\"color:#696969\"><span style=\"font-size:12px\">\r\n"
 					+ "	\r\n" + "		<p><strong>ATENCIOSAMENTE</strong></p>\r\n" + " ";
 		} else {
+			
 			corpoEmail = "<h2>AUDITORIA</h2>\r\n"
-					+ "	<p><span style=\"font-size:14px\"><b>A NOTA DO NÚMERO ÚNICO DE ORIGEM :</b> "
-					+ "	 <span style=\"font-size:16px\"><span style=\"color:#FF0000\"><b>" + nuNota
-					+ "</span></span></span></b><span style=\"font-size:14px\">\r\n"
+					+ "	<p><span style=\"font-size:14px\"><b>A NOTA DO NÚMERO ÚNICO DE ORIGEM :</b>"
+					+ "	 <span style=\"font-size:16px\"><span style=\"color:#FF0000\"><b>"+nuNota+"</span></span></span></b><span style=\"font-size:14px\">\r\n"
 					+ "	 <b>APOS VERIFICAÇÃO DE PATRIMÔNIO DA CONTABILIDADE, FOI DEVOLVIDA. </b></span><span style=\"font-size:16px\">\r\n"
+					+ "		<b>TEXTO ABAIXO RESPONSABILIDADE DA CONTABILIDADE. </b></span><span style=\"font-size:16px\"></span>\r\n"
+					+ "\r\n"
+					+ "		"+obs+"\r\n" 
 					+ "	\r\n"
+					+ " NUMERO DA PLAQUETA:" +teste +"\r\n"
 					+ "		 <p><span style=\"font-size:14px\"><b>NÃO RESPONDA ESTE E-MAIL!<br></b></span><span style=\"color:#696969\"><span style=\"font-size:12px\">\r\n"
-					+ "	\r\n" + "		<p><strong>ATENCIOSAMENTE</strong></p>";
+					+ "	\r\n"
+					+ "		<p><strong>ATENCIOSAMENTE</strong></p>";
 		}
 		char[] corpoEmailchar = corpoEmail.toCharArray();
 
@@ -66,11 +78,11 @@ public class EnviarEmail {
 			filaMensagemVO.setProperty("MAXTENTENVIO", new BigDecimal(3));
 			filaMensagemVO.setProperty("ASSUNTO", "Verificação De Patrimonio");
 			if (codGrupo == 6) {
-				filaMensagemVO.setProperty("EMAIL", "contabilidade@faepu.org.br");
-				// filaMensagemVO.setProperty("EMAIL", "tassio@faepu.org.br");
+				//filaMensagemVO.setProperty("EMAIL", "contabilidade@faepu.org.br");
+				 filaMensagemVO.setProperty("EMAIL", "tassio@faepu.org.br");
 			} else {
-				filaMensagemVO.setProperty("EMAIL", "auditoria@faepu.org.br");
-				// filaMensagemVO.setProperty("EMAIL", "t.santos.vasconcelos@gmail.com");
+				//filaMensagemVO.setProperty("EMAIL", "auditoria@faepu.org.br");
+				 filaMensagemVO.setProperty("EMAIL", "t.santos.vasconcelos@gmail.com");
 			}
 			// filaMensagemVO.setProperty("CODSMTP", new BigDecimal(2));
 			filaMensagemVO.setProperty("CODUSUREMET", usuarioLogado);
@@ -79,13 +91,12 @@ public class EnviarEmail {
 					(EntityVO) filaMensagemVO);
 			filaMensagemVO = (DynamicVO) createFilaMensagem.getValueObject();
 			codFila = filaMensagemVO.asBigDecimal("CODFILA");
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			msg = "Erro na inclusao do item " + e.getMessage();
 			System.out.println(msg);
 		}
-
 		JapeSession.close(hnd);
 	}
 
